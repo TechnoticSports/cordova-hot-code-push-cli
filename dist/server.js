@@ -11,7 +11,7 @@
       express = require('express'),
       app = express(),
       assetPort = process.env.PORT || 31284,
-      disablePublicTunnel = process.env.DISABLE_PUBLIC_TUNNEL || false,
+      disablePublicTunnel = true // process.env.DISABLE_PUBLIC_TUNNEL || false,
       compression = require('compression'),
       build = require('./build.js').execute,
       minimatch = require('minimatch'),
