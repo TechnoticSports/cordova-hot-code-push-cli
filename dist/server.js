@@ -11,8 +11,7 @@
       express = require('express'),
       app = express(),
       assetPort = process.env.PORT || 31284,
-      disablePublicTunnel = true // process.env.DISABLE_PUBLIC_TUNNEL || false,
-      compression = require('compression'),
+      disablePublicTunnel = process.env.DISABLE_PUBLIC_TUNNEL || false,
       build = require('./build.js').execute,
       minimatch = require('minimatch'),
       hidefile = require('hidefile'),
@@ -161,7 +160,7 @@
   function serveStaticAssets(app, opts) {
 
     // Static assets
-    app.use(compression());
+    app.use(require('compression')());
     app.enable('view cache');
     app.use('/', express['static'](sourceDirectory, { maxAge: 0 }));
   }
@@ -178,17 +177,17 @@
   function publicTunnel(port, options) {
     var publicTunnelDfd = Q.defer(),
         ngrok = require('ngrok');
-
     // And make it accessible from the internet
-    ngrok.connect(port, function (err, url) {
-      if (err) {
-        publicTunnelDfd.reject(err);
-        return console.log('Could not create tunnel: ', err);
-      }
+    ngrok.connect(port).then(function (url) {
 
       updateLocalEnv({ content_url: url });
 
       publicTunnelDfd.resolve(url);
+    })['catch'](function (err) {
+      if (err) {
+        publicTunnelDfd.reject(err);
+        return console.log('Could not create tunnel: ', err);
+      }
     });
 
     return publicTunnelDfd.promise;
